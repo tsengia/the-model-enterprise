@@ -1,0 +1,2 @@
+prowler==4.2.4
+aws-shell==0.2.2
