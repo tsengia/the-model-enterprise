@@ -1,0 +1,3 @@
+[submodule "bootstrap-amazon-s3-remote-backend-for-open-tofu"]
+	path = submodules/bootstrap-amazon-s3-remote-backend-for-open-tofu
+	url = https://github.com/aws-samples/bootstrap-amazon-s3-remote-backend-for-open-tofu.git
