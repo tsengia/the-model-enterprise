@@ -83,5 +83,5 @@ dbtable=$(aws cloudformation describe-stacks ${PROFILE_FLAGS} ${REGION_FLAGS} --
 echo "S3 Bucket: $bucket"
 echo "DynamoDB table: $dbtable"
 
-echo "AWS_REGION=\"${region}\"" > tf/terraform.tfvars
-echo "STATE_S3_BUCKET_NAME=\"${bucket}\"" >> tf/terraform.tfvars
+echo "aws_region=\"${region}\"" > tf/terraform.tfvars
+echo "state_s3_bucket_name=\"${bucket}\"" >> tf/terraform.tfvars
