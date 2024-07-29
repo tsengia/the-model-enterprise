@@ -2,7 +2,10 @@
     "name": "The Model Enterprise Dev Container",
     "image": "the-model-enterprise-dev-container:1.0.0",
     "mounts": [
-        {"type": "bind", "source": "/var/run/docker.sock", "target": "/var/run/docker.sock"}
+        {"type": "bind", "source": "/var/run/docker.sock", "target": "/var/run/docker-host.sock"}
     ],
-    "containerUser": "user"
+    "containerUser": "vscode",
+    "remoteUser": "vscode",
+    "overrideCommand": false,
+    "runArgs": ["--init"]
 }
