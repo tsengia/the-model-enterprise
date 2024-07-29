@@ -7,7 +7,7 @@ ADD requirements.txt requirements.txt
 RUN apt-get update && \
     # Install apk packages
     apt-get install -y --no-install-recommends \
-        apt-transport-https ca-certificates gnupg wget curl unzip make python3-pip shellcheck && \
+        apt-transport-https ca-certificates gnupg wget curl unzip make python3-pip shellcheck groff && \
     # Install opentofu
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://get.opentofu.org/opentofu.gpg | tee /etc/apt/keyrings/opentofu.gpg >/dev/null && \
