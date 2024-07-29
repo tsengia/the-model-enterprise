@@ -8,7 +8,7 @@ ADD requirements.txt requirements.txt
 
 RUN apk update && \
     # Install apk packages
-    apk add --no-cache wget curl make docker-cli docker-cli-compose docker-cli-buildx py3-pip shellcheck aws-cli && \
+    apk add --no-cache wget curl make py3-pip shellcheck aws-cli && \
     # Upgrade pip to the latest
     pip install --upgrade pip
 
@@ -34,28 +34,8 @@ RUN curl -LO https://github.com/gruntwork-io/terragrunt/releases/download/v0.64.
 # Remove the requirements.txt file we added earlier
 RUN rm requirements.txt
 
-# Setup non-root user and docker access
-RUN apk add --no-cache socat
-
+# Setup non-root user
 RUN adduser -D -u ${UID} -h /home/${NONROOT_USER} ${NONROOT_USER}
-
-# socat based proxy from these instructions: https://github.com/microsoft/vscode-dev-containers/tree/main/containers/docker-from-docker#final-fallback-socat
-# Default to root only access to the Docker socket, set up non-root init script
-RUN touch /var/run/docker-host.sock && ln -s /var/run/docker-host.sock /var/run/docker.sock
-
-# Create docker-init.sh to spin up socat
-RUN echo "#!/bin/sh\n\
-    sudoIf() { if [ \"\$(id -u)\" -ne 0 ]; then sudo \"\$@\"; else \"\$@\"; fi }\n\
-    sudoIf rm -rf /var/run/docker.sock\n\
-    ((sudoIf socat UNIX-LISTEN:/var/run/docker.sock,fork,mode=660,user=${NONROOT_USER} UNIX-CONNECT:/var/run/docker-host.sock) 2>&1 >> /tmp/vscr-docker-from-docker.log) & > /dev/null\n\
-    \"\$@\"" >> /usr/local/share/docker-init.sh \
-    && chmod +x /usr/local/share/docker-init.sh
-
-# VS Code overrides ENTRYPOINT and CMD when executing `docker run` by default.
-# Setting the ENTRYPOINT to docker-init.sh will configure non-root access to
-# the Docker socket if "overrideCommand": false is set in devcontainer.json.
-# The script will also execute CMD if you need to alter startup behaviors.
-ENTRYPOINT [ "/usr/local/share/docker-init.sh" ]
 
 USER ${NONROOT_USER}
 WORKDIR /home/${NONROOT_USER}
