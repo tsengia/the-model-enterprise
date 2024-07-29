@@ -1,5 +1,14 @@
 {
     "name": "The Model Enterprise Dev Container",
     "image": "the-model-enterprise-dev-container:1.0.0",
-    "remoteUser": "vscode"
+    "remoteUser": "ubuntu",
+    "mounts": [
+        {"target": "/home/ubuntu/.aws", "source": "${env:HOME}${env:USERPROFILE}/.aws", "type":"bind"},
+        {"target": "/var/run/docker.sock", "source": "/var/run/docker.sock", "type":"bind"},
+        {"target":"/home/ubuntu/.gnupg","source":"${env:HOME}${env:USERPROFILE}/.gnupg","type":"bind"}
+    ],
+    "features": {
+        "ghcr.io/devcontainers/features/docker-outside-of-docker": {}
+    },
+    "remoteEnv": { "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}" }
 }

@@ -1,16 +1,30 @@
-FROM ghcr.io/opentofu/opentofu:1.7.3
+FROM ubuntu:noble
 ARG ARCH=amd64
 ARG ARCH_ALT=x86_64
-ARG NONROOT_USER=vscode
-ARG UID=1000
-ARG GID=1000
+ARG NONROOT_USER=ubuntu
 ADD requirements.txt requirements.txt
 
-RUN apk update && \
+RUN apt-get update && \
     # Install apk packages
-    apk add --no-cache wget curl make py3-pip shellcheck aws-cli && \
-    # Upgrade pip to the latest
-    pip install --upgrade pip
+    apt-get install -y --no-install-recommends \
+        apt-transport-https ca-certificates gnupg wget curl unzip make python3-pip shellcheck && \
+    # Install opentofu
+    install -m 0755 -d /etc/apt/keyrings && \
+    curl -fsSL https://get.opentofu.org/opentofu.gpg | tee /etc/apt/keyrings/opentofu.gpg >/dev/null && \
+    curl -fsSL https://packages.opentofu.org/opentofu/tofu/gpgkey | gpg --no-tty --batch --dearmor -o /etc/apt/keyrings/opentofu-repo.gpg >/dev/null &&\
+    chmod a+r /etc/apt/keyrings/opentofu.gpg /etc/apt/keyrings/opentofu-repo.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/opentofu.gpg,/etc/apt/keyrings/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main \
+    deb-src [signed-by=/etc/apt/keyrings/opentofu.gpg,/etc/apt/keyrings/opentofu-repo.gpg] https://packages.opentofu.org/opentofu/tofu/any/ any main" | \
+    tee /etc/apt/sources.list.d/opentofu.list > /dev/null && \
+    chmod a+r /etc/apt/sources.list.d/opentofu.list && \
+    apt-get update && apt-get install -y --no-install-recommends tofu &&\
+    # Clean up
+    apt-get clean && rm -rf /var/apt/cache /tmp/*
+
+# Install AWS CLI v3
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" &&\
+    unzip awscliv2.zip && \
+    ./aws/install
 
 # Download eksctl
 RUN curl -LO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksctl_Linux_${ARCH}.tar.gz" && \
@@ -21,7 +35,7 @@ RUN curl -LO "https://github.com/eksctl-io/eksctl/releases/latest/download/eksct
     mv /tmp/eksctl /usr/bin
 
 # Install aws-shell and prowler via pip
-RUN pip install -r requirements.txt
+RUN pip install --break-system-packages -r requirements.txt
 
 # Download and install Trivy
 RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.53.0
@@ -33,9 +47,6 @@ RUN curl -LO https://github.com/gruntwork-io/terragrunt/releases/download/v0.64.
 
 # Remove the requirements.txt file we added earlier
 RUN rm requirements.txt
-
-# Setup non-root user
-RUN adduser -D -u ${UID} -h /home/${NONROOT_USER} ${NONROOT_USER}
 
 USER ${NONROOT_USER}
 WORKDIR /home/${NONROOT_USER}
