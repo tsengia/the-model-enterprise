@@ -23,4 +23,19 @@ cd the-model-enterprise
 Supplying `--profile PROFILE` allows you to control the AWS CLI profile to assume when deploying the cloud formation stack.    
 Supplying `--region REGION` allows you to override the profile's default region to deploy the cloud formation stack into.
 
+Once you've run the bootstrap script, you can then initialize and deploy with OpenTofu:
+```bash
+# Enter the OpenTofu directory
+cd tf
+
+# Initialize OpenTofu
+tofu init
+
+# View resources to be deployed
+tofu plan
+
+# Deploy the resources
+tofu apply
+```
+
 __TODO__: Add steps for pulling and using the dev container
